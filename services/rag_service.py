@@ -7,31 +7,34 @@ def answer_question(question, documents, chat_history=None):
     if chat_history is None:
         chat_history = []
 
-    # Step 1: Retrieve relevant documents
+    # Step 1: Build a query using the previous conversation
+    retrieval_query = question
+    
+    # Step 2: Retrieve relevant documents
     results = retrieve_relevant_text(
-        question,
+        retrieval_query,
         documents,
         top_k=2
     )
 
-    # Step 2: Build the context
+    # Step 3: Combine retrieved text
     context = "\n".join(
         result["text"] for result in results
     )
 
-    # Step 3: Include previous conversation
+    # Step 4: Format conversation history
     history = "\n".join(
         f"{item['role']}: {item['content']}"
         for item in chat_history
     )
 
-    # Step 4: Create the prompt
+    # Step 5: Build the prompt
     prompt = f"""
 You are an AI career assistant.
 
 Use the context and conversation history to answer.
-Prefer the provided context for factual information.
-If the information is unavailable, say so.
+Answer using the provided context.
+If the information is unavailable, say you do not have enough information.
 
 Context:
 {context}
@@ -45,5 +48,5 @@ Current question:
 Give a clear, simple answer.
 """
 
-    # Step 5: Generate the response
+    # Step 6: Generate the response
     return generate_response(prompt)
